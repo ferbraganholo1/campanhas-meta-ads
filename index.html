@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Campanhas Meta Ads</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ink:#1B2440; --ink-soft:#5B6280; --bg:#F5F4F0; --card:#FFFFFF; --line:#E4E1D8;
+    --coral:#E8623F; --coral-bg:#FCE7E0; --coral-ink:#8A2E17;
+    --teal:#1E7A6B; --teal-bg:#DEF0EA; --teal-ink:#0F4A40;
+    --amber:#C97A1E; --amber-bg:#FAECD6; --amber-ink:#6E4408;
+    --blue:#2C5C99; --blue-bg:#DEE9F7; --blue-ink:#173A63;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:32px 20px 80px; background:var(--bg); font-family:'Segoe UI',system-ui,-apple-system,sans-serif; color:var(--ink);}
+  .wrap{max-width:960px; margin:0 auto;}
+  .topbar{display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; gap:12px; flex-wrap:wrap;}
+  .eyebrow{font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--coral); font-weight:700; margin-bottom:4px;}
+  h1{font-size:26px; margin:0; font-weight:700; letter-spacing:-0.01em;}
+  .sub{color:var(--ink-soft); font-size:13px; margin:4px 0 0;}
+  button{
+    font-family:inherit; cursor:pointer; border:1px solid var(--line); background:#fff;
+    border-radius:9px; padding:9px 16px; font-size:13.5px; font-weight:600; color:var(--ink);
+  }
+  button:hover{background:#F2F0EA;}
+  button.primary{background:var(--ink); color:#fff; border-color:var(--ink);}
+  button.primary:hover{background:#2A3560;}
+  button.danger{color:var(--coral-ink); border-color:var(--coral-bg);}
+  button.danger:hover{background:var(--coral-bg);}
+  button.ghost{border:none; background:none;}
+  button:disabled{opacity:.5; cursor:not-allowed;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px 22px; margin-bottom:16px;}
+  .card h2{font-size:15px; margin:0 0 14px; display:flex; align-items:center; gap:10px; font-weight:700;}
+  .num{display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:7px; font-size:12px; font-weight:700; background:var(--ink); color:#fff; flex:none;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+  label.fl{display:block; font-size:11.5px; color:var(--ink-soft); font-weight:600; margin-bottom:5px; text-transform:uppercase; letter-spacing:.03em;}
+  input[type=text], textarea{
+    width:100%; border:none; border-bottom:1.5px dashed var(--line); padding:6px 2px 8px;
+    font-size:14px; outline:none; margin-bottom:14px; font-family:inherit; background:transparent; color:var(--ink); resize:vertical;
+  }
+  input[type=text]:focus, textarea:focus{border-bottom-color:var(--coral);}
+
+  .core{border:2px solid var(--teal); background:var(--teal-bg);}
+  .core h2{color:var(--teal-ink);}
+  .flowrow{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px;}
+  .flowstep{background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; font-size:12.5px;}
+  .flowstep .ttl{font-weight:700; color:var(--teal-ink); font-size:12.5px; margin-bottom:3px;}
+  .flowstep .dsc{color:var(--ink-soft); font-size:11.5px;}
+
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; margin-bottom:16px;}
+  th{background:var(--teal); color:#fff; font-size:11px; text-transform:uppercase; letter-spacing:.03em; padding:8px 10px; text-align:left; font-weight:700;}
+  td{border-bottom:1px solid var(--line); padding:6px 8px; font-size:13px;}
+  tr:last-child td{border-bottom:none;}
+  td input[type=text]{margin-bottom:0; border-bottom:1px solid transparent;}
+  td input[type=text]:focus{border-bottom-color:var(--coral);}
+  .subtitle{font-size:12px; color:var(--teal-ink); font-weight:700; margin:16px 0 8px; text-transform:uppercase; letter-spacing:.03em;}
+  .subtitle:first-child{margin-top:0;}
+
+  .tags{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;}
+  .tag{display:flex; align-items:center; gap:6px; background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; font-size:12.5px; cursor:pointer;}
+  .badge{display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.03em; padding:3px 8px; border-radius:6px; margin-left:8px;}
+  .badge.coral{background:var(--coral-bg); color:var(--coral-ink);}
+  .badge.amber{background:var(--amber-bg); color:var(--amber-ink);}
+  .badge.blue{background:var(--blue-bg); color:var(--blue-ink);}
+
+  .footer-grid{display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;}
+  @media (max-width:720px){.grid2,.grid3,.flowrow,.footer-grid{grid-template-columns:1fr;}}
+
+  /* list view */
+  .listcard{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:16px 18px; margin-bottom:10px; display:flex; align-items:center; justify-content:space-between; gap:12px;}
+  .listcard .titulo{font-weight:700; font-size:14.5px; margin:0 0 3px;}
+  .listcard .meta{color:var(--ink-soft); font-size:12px; margin:0;}
+  .empty{text-align:center; color:var(--ink-soft); font-size:13.5px; padding:48px 0;}
+  .toast{position:sticky; top:10px; z-index:5; background:var(--teal); color:#fff; padding:8px 14px; border-radius:9px; font-size:13px; font-weight:600; display:none; margin-bottom:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="toast" class="toast"></div>
+
+  <!-- LIST VIEW -->
+  <div id="listView">
+    <div class="topbar">
+      <div>
+        <div class="eyebrow">Campanhas · Meta Ads</div>
+        <h1>Minhas campanhas</h1>
+        <p class="sub">Cada campanha fica salva aqui. Abra uma pra continuar preenchendo, ou crie uma nova.</p>
+      </div>
+      <button class="primary" onclick="novaCampanha()">+ Nova campanha</button>
+    </div>
+    <div id="listaContainer"></div>
+  </div>
+
+  <!-- FORM VIEW -->
+  <div id="formView" style="display:none;">
+    <div class="topbar">
+      <div style="flex:1; min-width:240px;">
+        <div class="eyebrow">Campanha</div>
+        <input type="text" id="nomeCampanha" placeholder="Nome da campanha (ex: Black Friday 2026)" style="font-size:20px; font-weight:700; border:none; border-bottom:2px dashed var(--line); background:transparent; width:100%; padding:4px 2px;">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button onclick="voltarLista()">← Voltar</button>
+        <button class="danger" id="btnExcluir" onclick="excluirCampanha()" style="display:none;">Excluir</button>
+        <button class="primary" onclick="salvarCampanha()">Salvar</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">1</span>Contexto e objetivo</h2>
+      <div class="grid2">
+        <div><label class="fl">Produto / serviço / oferta</label><input type="text" id="c_produto"></div>
+        <div><label class="fl">Objetivo de negócio real</label><input type="text" id="c_objetivo"></div>
+      </div>
+      <label class="fl">Por que agora</label>
+      <input type="text" id="c_motivo">
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h2><span class="num">2</span>Oferta</h2>
+        <label class="fl">O que exatamente está sendo oferecido</label>
+        <input type="text" id="o_oque">
+        <label class="fl">Diferencial frente ao que já foi feito</label>
+        <input type="text" id="o_diferencial">
+      </div>
+      <div class="card">
+        <h2><span class="num">3</span>Público</h2>
+        <label class="fl">Cliente ideal dessa campanha</label>
+        <input type="text" id="p_ideal">
+        <label class="fl">Quem NÃO deve ser o foco</label>
+        <input type="text" id="p_exclusao">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">4</span>Orçamento e prazo</h2>
+      <div class="grid3">
+        <div><label class="fl">Verba total</label><input type="text" id="b_verba"></div>
+        <div><label class="fl">Início / fim</label><input type="text" id="b_prazo"></div>
+        <div><label class="fl">Limite diário</label><input type="text" id="b_limite"></div>
+      </div>
+    </div>
+
+    <div class="card core">
+      <h2><span class="num" style="background:var(--teal)">5</span>Geração e qualificação de ideias de criativo <span class="badge coral">núcleo</span></h2>
+
+      <div class="flowrow">
+        <div class="flowstep"><div class="ttl">5.1 Fontes</div><div class="dsc">De onde vem o ângulo</div></div>
+        <div class="flowstep"><div class="ttl">5.2 Ângulos</div><div class="dsc">Como comunicar a oferta</div></div>
+        <div class="flowstep"><div class="ttl">5.4 Qualificação</div><div class="dsc">Filtro antes de produzir</div></div>
+        <div class="flowstep"><div class="ttl">5.5 Priorização</div><div class="dsc">Ordem de teste</div></div>
+      </div>
+
+      <div class="subtitle">5.1 · Fontes de ideia</div>
+      <table>
+        <tr><th style="width:45%">Fonte</th><th>O que anotar</th></tr>
+        <tr><td>Perguntas frequentes de clientes</td><td><input type="text" id="f_perguntas"></td></tr>
+        <tr><td>Objeções antes da venda</td><td><input type="text" id="f_objecoes"></td></tr>
+        <tr><td>O que já vendeu/repercutiu orgânico</td><td><input type="text" id="f_organico"></td></tr>
+        <tr><td>Anúncios de concorrentes</td><td><input type="text" id="f_concorrentes"></td></tr>
+        <tr><td>Depoimentos / provas sociais</td><td><input type="text" id="f_provas"></td></tr>
+      </table>
+
+      <div class="subtitle">5.2 · Ângulos a testar</div>
+      <div class="tags">
+        <label class="tag"><input type="checkbox" id="ang_dor">Dor / problema</label>
+        <label class="tag"><input type="checkbox" id="ang_desejo">Desejo / resultado</label>
+        <label class="tag"><input type="checkbox" id="ang_prova">Prova social</label>
+        <label class="tag"><input type="checkbox" id="ang_curiosidade">Curiosidade</label>
+        <label class="tag"><input type="checkbox" id="ang_urgencia">Urgência / escassez</label>
+        <label class="tag"><input type="checkbox" id="ang_comparacao">Comparação (antes x depois)</label>
+      </div>
+
+      <div class="subtitle">5.3 · Ideias levantadas</div>
+      <table>
+        <tr><th>Ideia / gancho</th><th>Fonte</th><th>Ângulo</th><th>Formato</th></tr>
+        <tr><td><input type="text" id="i1_ideia"></td><td><input type="text" id="i1_fonte"></td><td><input type="text" id="i1_angulo"></td><td><input type="text" id="i1_formato"></td></tr>
+        <tr><td><input type="text" id="i2_ideia"></td><td><input type="text" id="i2_fonte"></td><td><input type="text" id="i2_angulo"></td><td><input type="text" id="i2_formato"></td></tr>
+        <tr><td><input type="text" id="i3_ideia"></td><td><input type="text" id="i3_fonte"></td><td><input type="text" id="i3_angulo"></td><td><input type="text" id="i3_formato"></td></tr>
+      </table>
+
+      <div class="subtitle">5.4 · Checklist de qualificação <span class="badge amber">responder antes de produzir</span></div>
+      <table>
+        <tr><th style="width:40%">Pergunta</th><th>Ideia 1</th><th>Ideia 2</th><th>Ideia 3</th></tr>
+        <tr><td>Dor/desejo confirmada, ou suposição?</td><td><input type="text" id="q1_1"></td><td><input type="text" id="q1_2"></td><td><input type="text" id="q1_3"></td></tr>
+        <tr><td>Se postasse sem pagar, alguém pararia pra ver?</td><td><input type="text" id="q2_1"></td><td><input type="text" id="q2_2"></td><td><input type="text" id="q2_3"></td></tr>
+        <tr><td>O gancho entrega a promessa, ou só enfeita?</td><td><input type="text" id="q3_1"></td><td><input type="text" id="q3_2"></td><td><input type="text" id="q3_3"></td></tr>
+        <tr><td>Tem prova sustentando a promessa?</td><td><input type="text" id="q4_1"></td><td><input type="text" id="q4_2"></td><td><input type="text" id="q4_3"></td></tr>
+        <tr><td>Tem um "por que agora" claro?</td><td><input type="text" id="q5_1"></td><td><input type="text" id="q5_2"></td><td><input type="text" id="q5_3"></td></tr>
+        <tr><td>Se não performar, já sei dizer por quê?</td><td><input type="text" id="q6_1"></td><td><input type="text" id="q6_2"></td><td><input type="text" id="q6_3"></td></tr>
+      </table>
+
+      <div class="subtitle">5.5 · Ordem de teste sugerida</div>
+      <div class="grid3">
+        <input type="text" id="pr_1" placeholder="1º">
+        <input type="text" id="pr_2" placeholder="2º">
+        <input type="text" id="pr_3" placeholder="3º">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">6</span>Criativos selecionados <span class="badge blue">só o que passou no filtro</span></h2>
+      <table>
+        <tr><th>Ideia</th><th>Copy principal</th><th>CTA</th><th>Responsável</th><th>Prazo</th></tr>
+        <tr>
+          <td><input type="text" id="cr_ideia"></td>
+          <td><input type="text" id="cr_copy"></td>
+          <td><input type="text" id="cr_cta"></td>
+          <td><input type="text" id="cr_resp"></td>
+          <td><input type="text" id="cr_prazo"></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer-grid">
+      <div class="card">
+        <h2><span class="num">7</span>Destino</h2>
+        <label class="fl">Para onde vai o clique</label>
+        <input type="text" id="d_clique">
+        <label class="fl">Já existe ou precisa criar?</label>
+        <input type="text" id="d_existe">
+      </div>
+      <div class="card">
+        <h2><span class="num">8</span>Sucesso</h2>
+        <label class="fl">Resultado de negócio esperado</label>
+        <input type="text" id="s_resultado">
+      </div>
+      <div class="card">
+        <h2><span class="num">9</span>Restrições</h2>
+        <label class="fl">O que não pode aparecer</label>
+        <input type="text" id="r_naopode">
+        <label class="fl">Quem aprova</label>
+        <input type="text" id="r_aprova">
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="num">10</span>Aprendizados <span class="badge coral">preencher depois</span></h2>
+      <div class="grid3">
+        <div><label class="fl">O que funcionou</label><input type="text" id="ap_funcionou"></div>
+        <div><label class="fl">O que não funcionou</label><input type="text" id="ap_naofuncionou"></div>
+        <div><label class="fl">Testar na próxima</label><input type="text" id="ap_testar"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ------------------------------------------------------------------
+   Camada de persistência: este artefato usa o localStorage do
+   navegador (isolado por artefato, sobrevive a recarregar e reabrir).
+   A interface "window.storage" abaixo é só um wrapper fino sobre
+   localStorage para manter o restante do código de campanha intacto.
+------------------------------------------------------------------- */
+window.storage = {
+  async get(key){
+    const v = localStorage.getItem(key);
+    return v !== null ? { value: v } : null;
+  },
+  async set(key, value){
+    localStorage.setItem(key, value);
+    return true;
+  },
+  async delete(key){
+    localStorage.removeItem(key);
+    return true;
+  },
+  async list(prefix){
+    const keys = Object.keys(localStorage).filter(k => k.startsWith(prefix));
+    return { keys };
+  }
+};
+
+let currentId = null;
+const FIELD_IDS = ['c_produto','c_objetivo','c_motivo','o_oque','o_diferencial','p_ideal','p_exclusao',
+  'b_verba','b_prazo','b_limite','f_perguntas','f_objecoes','f_organico','f_concorrentes','f_provas',
+  'i1_ideia','i1_fonte','i1_angulo','i1_formato','i2_ideia','i2_fonte','i2_angulo','i2_formato',
+  'i3_ideia','i3_fonte','i3_angulo','i3_formato',
+  'q1_1','q1_2','q1_3','q2_1','q2_2','q2_3','q3_1','q3_2','q3_3','q4_1','q4_2','q4_3','q5_1','q5_2','q5_3','q6_1','q6_2','q6_3',
+  'pr_1','pr_2','pr_3','cr_ideia','cr_copy','cr_cta','cr_resp','cr_prazo',
+  'd_clique','d_existe','s_resultado','r_naopode','r_aprova','ap_funcionou','ap_naofuncionou','ap_testar'];
+const CHECK_IDS = ['ang_dor','ang_desejo','ang_prova','ang_curiosidade','ang_urgencia','ang_comparacao'];
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display='none'; }, 2200);
+}
+
+function limparFormulario(){
+  document.getElementById('nomeCampanha').value = '';
+  FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  CHECK_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.checked = false; });
+}
+
+function coletarDados(){
+  const dados = { nome: document.getElementById('nomeCampanha').value || 'Sem nome' };
+  FIELD_IDS.forEach(id => { dados[id] = document.getElementById(id).value; });
+  CHECK_IDS.forEach(id => { dados[id] = document.getElementById(id).checked; });
+  return dados;
+}
+
+function preencherFormulario(dados){
+  document.getElementById('nomeCampanha').value = dados.nome || '';
+  FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.value = dados[id] || ''; });
+  CHECK_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.checked = !!dados[id]; });
+}
+
+async function novaCampanha(){
+  currentId = 'campanha_' + Date.now();
+  limparFormulario();
+  document.getElementById('btnExcluir').style.display = 'none';
+  document.getElementById('listView').style.display = 'none';
+  document.getElementById('formView').style.display = 'block';
+}
+
+async function abrirCampanha(id){
+  try{
+    const res = await window.storage.get('campanha:' + id, false);
+    if(!res){ showToast('Não foi possível abrir essa campanha.'); return; }
+    const dados = JSON.parse(res.value);
+    currentId = id;
+    preencherFormulario(dados);
+    document.getElementById('btnExcluir').style.display = 'inline-block';
+    document.getElementById('listView').style.display = 'none';
+    document.getElementById('formView').style.display = 'block';
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao abrir campanha.');
+  }
+}
+
+function voltarLista(){
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('listView').style.display = 'block';
+  carregarLista();
+}
+
+async function salvarCampanha(){
+  try{
+    const dados = coletarDados();
+    dados.atualizadoEm = new Date().toISOString();
+    const result = await window.storage.set('campanha:' + currentId, JSON.stringify(dados), false);
+    if(!result){ showToast('Não foi possível salvar.'); return; }
+    showToast('Campanha salva.');
+    document.getElementById('btnExcluir').style.display = 'inline-block';
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao salvar campanha.');
+  }
+}
+
+async function excluirCampanha(){
+  if(!currentId) return;
+  try{
+    await window.storage.delete('campanha:' + currentId, false);
+    showToast('Campanha excluída.');
+    voltarLista();
+  }catch(err){
+    console.error(err);
+    showToast('Erro ao excluir.');
+  }
+}
+
+async function carregarLista(){
+  const container = document.getElementById('listaContainer');
+  container.innerHTML = '<p class="empty">Carregando...</p>';
+  try{
+    const listagem = await window.storage.list('campanha:', false);
+    const keys = (listagem && listagem.keys) ? listagem.keys : [];
+    if(keys.length === 0){
+      container.innerHTML = '<p class="empty">Nenhuma campanha salva ainda. Clique em "+ Nova campanha" pra começar.</p>';
+      return;
+    }
+    const itens = [];
+    for(const key of keys){
+      try{
+        const res = await window.storage.get(key, false);
+        if(res){
+          const dados = JSON.parse(res.value);
+          const id = key.replace('campanha:', '');
+          itens.push({ id, nome: dados.nome || 'Sem nome', atualizadoEm: dados.atualizadoEm });
+        }
+      }catch(e){ /* ignora item corrompido */ }
+    }
+    itens.sort((a,b) => (b.atualizadoEm||'').localeCompare(a.atualizadoEm||''));
+    container.innerHTML = '';
+    itens.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'listcard';
+      const dataFmt = item.atualizadoEm ? new Date(item.atualizadoEm).toLocaleString('pt-BR') : '';
+      div.innerHTML = '<div><p class="titulo"></p><p class="meta">Atualizado em ' + dataFmt + '</p></div><button>Abrir →</button>';
+      div.querySelector('.titulo').textContent = item.nome;
+      div.querySelector('button').onclick = () => abrirCampanha(item.id);
+      container.appendChild(div);
+    });
+  }catch(err){
+    console.error(err);
+    container.innerHTML = '<p class="empty">Não foi possível carregar as campanhas.</p>';
+  }
+}
+
+carregarLista();
+</script>
+</body>
+</html>
