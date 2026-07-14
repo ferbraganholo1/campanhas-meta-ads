@@ -75,12 +75,28 @@
   .listcard .meta{color:var(--ink-soft); font-size:12px; margin:0;}
   .empty{text-align:center; color:var(--ink-soft); font-size:13.5px; padding:48px 0;}
   .toast{position:sticky; top:10px; z-index:5; background:var(--teal); color:#fff; padding:8px 14px; border-radius:9px; font-size:13px; font-weight:600; display:none; margin-bottom:14px;}
+
+  /* documento exportado (impressão / PDF) */
+  #printBriefing{display:none;}
+  @media print{
+    body.printing-briefing > *:not(#printBriefing){display:none !important;}
+    #printBriefing{display:block !important; padding:0; color:#111;}
+    #printBriefing h1{font-size:22px; margin:0 0 4px;}
+    #printBriefing .pdate{color:#666; font-size:12px; margin:0 0 22px;}
+    #printBriefing h2{font-size:15px; border-bottom:1px solid #ccc; padding-bottom:4px; margin:22px 0 10px; color:#0F4A40;}
+    #printBriefing h3{font-size:13px; margin:14px 0 8px; color:#0F4A40;}
+    #printBriefing .pf{margin-bottom:9px; break-inside:avoid;}
+    #printBriefing .pl{font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:#666; font-weight:600;}
+    #printBriefing .pv{font-size:13px;}
+    #printBriefing .pcard{border:1px solid #ddd; border-radius:6px; padding:8px; margin-bottom:8px; font-size:12.5px; break-inside:avoid;}
+  }
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <div id="toast" class="toast"></div>
+  <div id="printBriefing"></div>
 
   <!-- LIST VIEW -->
   <div id="listView">
@@ -104,6 +120,7 @@
       </div>
       <div style="display:flex; gap:8px;">
         <button onclick="voltarLista()">← Voltar</button>
+        <button onclick="exportarBriefing()">Exportar briefing (PDF)</button>
         <button class="danger" id="btnExcluir" onclick="excluirCampanha()" style="display:none;">Excluir</button>
         <button class="primary" onclick="salvarCampanha()">Salvar</button>
       </div>
@@ -285,6 +302,122 @@ const FIELD_IDS = ['c_produto','c_objetivo','c_motivo','o_oque','o_diferencial',
   'pr_1','pr_2','pr_3','cr_ideia','cr_copy','cr_cta','cr_resp','cr_prazo',
   'd_clique','d_existe','s_resultado','r_naopode','r_aprova','ap_funcionou','ap_naofuncionou','ap_testar'];
 const CHECK_IDS = ['ang_dor','ang_desejo','ang_prova','ang_curiosidade','ang_urgencia','ang_comparacao'];
+const ANGULO_LABELS = {
+  ang_dor: 'Dor / problema',
+  ang_desejo: 'Desejo / resultado',
+  ang_prova: 'Prova social',
+  ang_curiosidade: 'Curiosidade',
+  ang_urgencia: 'Urgência / escassez',
+  ang_comparacao: 'Comparação (antes x depois)'
+};
+
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.textContent = str == null ? '' : str;
+  return d.innerHTML;
+}
+
+function pf(label, value){
+  const v = (value && String(value).trim()) ? value : '—';
+  return '<div class="pf"><div class="pl">' + escapeHtml(label) + '</div><div class="pv">' + escapeHtml(v) + '</div></div>';
+}
+
+function exportarBriefing(){
+  const g = id => document.getElementById(id).value;
+  const nome = document.getElementById('nomeCampanha').value || 'Sem nome';
+  const angulosMarcados = Object.keys(ANGULO_LABELS).filter(id => document.getElementById(id).checked).map(id => ANGULO_LABELS[id]);
+
+  let html = '<h1>' + escapeHtml(nome) + '</h1>';
+  html += '<p class="pdate">Briefing de campanha · Meta Ads · gerado em ' + new Date().toLocaleDateString('pt-BR') + '</p>';
+
+  html += '<h2>1. Contexto e objetivo</h2>';
+  html += pf('Produto / serviço / oferta', g('c_produto'));
+  html += pf('Objetivo de negócio real', g('c_objetivo'));
+  html += pf('Por que agora', g('c_motivo'));
+
+  html += '<h2>2. Oferta</h2>';
+  html += pf('O que exatamente está sendo oferecido', g('o_oque'));
+  html += pf('Diferencial frente ao que já foi feito', g('o_diferencial'));
+
+  html += '<h2>3. Público</h2>';
+  html += pf('Cliente ideal dessa campanha', g('p_ideal'));
+  html += pf('Quem NÃO deve ser o foco', g('p_exclusao'));
+
+  html += '<h2>4. Orçamento e prazo</h2>';
+  html += pf('Verba total', g('b_verba'));
+  html += pf('Início / fim', g('b_prazo'));
+  html += pf('Limite diário', g('b_limite'));
+
+  html += '<h2>5. Geração e qualificação de ideias de criativo</h2>';
+  html += '<h3>5.1 · Fontes de ideia</h3>';
+  html += pf('Perguntas frequentes de clientes', g('f_perguntas'));
+  html += pf('Objeções antes da venda', g('f_objecoes'));
+  html += pf('O que já vendeu/repercutiu orgânico', g('f_organico'));
+  html += pf('Anúncios de concorrentes', g('f_concorrentes'));
+  html += pf('Depoimentos / provas sociais', g('f_provas'));
+
+  html += '<h3>5.2 · Ângulos a testar</h3>';
+  html += '<div class="pf"><div class="pv">' + (angulosMarcados.length ? escapeHtml(angulosMarcados.join(', ')) : '—') + '</div></div>';
+
+  html += '<h3>5.3 · Ideias levantadas</h3>';
+  [['i1_ideia','i1_fonte','i1_angulo','i1_formato'],['i2_ideia','i2_fonte','i2_angulo','i2_formato'],['i3_ideia','i3_fonte','i3_angulo','i3_formato']].forEach((ids, i) => {
+    const [ideia, fonte, angulo, formato] = ids.map(g);
+    if(ideia || fonte || angulo || formato){
+      html += '<div class="pcard"><strong>Ideia ' + (i+1) + ':</strong> ' + escapeHtml(ideia || '—') +
+        '<br><span class="pl">Fonte:</span> ' + escapeHtml(fonte || '—') +
+        ' · <span class="pl">Ângulo:</span> ' + escapeHtml(angulo || '—') +
+        ' · <span class="pl">Formato:</span> ' + escapeHtml(formato || '—') + '</div>';
+    }
+  });
+
+  html += '<h3>5.4 · Checklist de qualificação</h3>';
+  const perguntas = [
+    ['Dor/desejo confirmada, ou suposição?','q1_1','q1_2','q1_3'],
+    ['Se postasse sem pagar, alguém pararia pra ver?','q2_1','q2_2','q2_3'],
+    ['O gancho entrega a promessa, ou só enfeita?','q3_1','q3_2','q3_3'],
+    ['Tem prova sustentando a promessa?','q4_1','q4_2','q4_3'],
+    ['Tem um "por que agora" claro?','q5_1','q5_2','q5_3'],
+    ['Se não performar, já sei dizer por quê?','q6_1','q6_2','q6_3']
+  ];
+  perguntas.forEach(([pergunta, a, b, c]) => {
+    html += '<div class="pf"><div class="pl">' + escapeHtml(pergunta) + '</div><div class="pv">Ideia 1: ' +
+      escapeHtml(g(a) || '—') + ' · Ideia 2: ' + escapeHtml(g(b) || '—') + ' · Ideia 3: ' + escapeHtml(g(c) || '—') + '</div></div>';
+  });
+
+  html += '<h3>5.5 · Ordem de teste sugerida</h3>';
+  html += pf('1º → 2º → 3º', [g('pr_1'), g('pr_2'), g('pr_3')].filter(Boolean).join(' → '));
+
+  html += '<h2>6. Criativos selecionados</h2>';
+  html += pf('Ideia', g('cr_ideia'));
+  html += pf('Copy principal', g('cr_copy'));
+  html += pf('CTA', g('cr_cta'));
+  html += pf('Responsável', g('cr_resp'));
+  html += pf('Prazo', g('cr_prazo'));
+
+  html += '<h2>7. Destino</h2>';
+  html += pf('Para onde vai o clique', g('d_clique'));
+  html += pf('Já existe ou precisa criar?', g('d_existe'));
+
+  html += '<h2>8. Sucesso</h2>';
+  html += pf('Resultado de negócio esperado', g('s_resultado'));
+
+  html += '<h2>9. Restrições</h2>';
+  html += pf('O que não pode aparecer', g('r_naopode'));
+  html += pf('Quem aprova', g('r_aprova'));
+
+  html += '<h2>10. Aprendizados</h2>';
+  html += pf('O que funcionou', g('ap_funcionou'));
+  html += pf('O que não funcionou', g('ap_naofuncionou'));
+  html += pf('Testar na próxima', g('ap_testar'));
+
+  document.getElementById('printBriefing').innerHTML = html;
+  document.body.classList.add('printing-briefing');
+  window.print();
+}
+
+window.addEventListener('afterprint', () => {
+  document.body.classList.remove('printing-briefing');
+});
 
 function showToast(msg){
   const t = document.getElementById('toast');
